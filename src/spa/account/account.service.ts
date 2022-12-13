@@ -72,6 +72,7 @@ export const useCreateAccount = (
         email,
         password,
         role: [speciality],
+        speciality,
       }),
     {
       ...config,

@@ -70,7 +70,7 @@ export const useUserUpdate = (
   config: UseMutationOptions<User, AxiosError<UserMutateError>, User> = {}
 ) => {
   const queryClient = useQueryClient();
-  return useMutation((payload) => Axios.put('/admin/users', payload), {
+  return useMutation((payload) => Axios.put('/users/' + payload?.id), {
     ...config,
     onSuccess: (data, payload: TODO, ...rest) => {
       queryClient.cancelQueries([...usersKeys.all(), 'users']);
