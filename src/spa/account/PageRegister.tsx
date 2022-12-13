@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import {
   Alert,
-  AlertDescription,
   AlertTitle,
   Box,
   Button,
@@ -13,12 +12,8 @@ import {
   Stack,
 } from '@chakra-ui/react';
 import { Formiz, useForm } from '@formiz/core';
-import {
-  isEmail,
-  isMaxLength,
-  isMinLength,
-} from '@formiz/validations';
-import { Trans, useTranslation } from 'react-i18next';
+import { isEmail, isMaxLength, isMinLength } from '@formiz/validations';
+import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { FieldInput } from '@/components/FieldInput';
@@ -33,7 +28,6 @@ export const PageRegister = () => {
     subscribe: { form: true, fields: ['langKey'] },
   });
   const toastError = useToastError();
-  const [accountEmail, setAccountEmail] = useState('');
   const roles = [
     { label: 'Employee', value: 'ROLE_EMPLOYEE' },
     { label: 'Chef', value: 'ROLE_CHEF' },
@@ -48,9 +42,6 @@ export const PageRegister = () => {
     isLoading,
     isSuccess,
   } = useCreateAccount({
-    onMutate: ({ email }) => {
-      setAccountEmail(email);
-    },
     onError: (error) => {
       const { errorKey, title } = error?.response?.data || {};
 
@@ -90,13 +81,6 @@ export const PageRegister = () => {
             <AlertTitle mt={4} mb={1} fontSize="lg">
               {t('account:register.feedbacks.registrationSuccess.title')}
             </AlertTitle>
-            <AlertDescription>
-              <Trans
-                t={t}
-                i18nKey="account:register.feedbacks.registrationSuccess.description"
-                values={{ email: accountEmail }}
-              />
-            </AlertDescription>
           </Alert>
           <Center mt="8">
             <Button

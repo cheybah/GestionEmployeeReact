@@ -112,7 +112,7 @@ export const AccountMenu = ({ ...rest }) => {
     <Box color="gray.800" _dark={{ color: 'white' }}>
       <Menu placement="bottom-end" {...rest}>
         <MenuButton borderRadius="full" _focusVisible={{ shadow: 'outline' }}>
-          <Avatar size="sm" icon={<></>} name={account?.login}>
+          <Avatar size="sm" icon={<></>} name={account?.username}>
             {isLoading && <Spinner size="xs" />}
           </Avatar>
         </MenuButton>

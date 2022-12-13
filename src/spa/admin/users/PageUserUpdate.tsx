@@ -32,6 +32,7 @@ export const PageUserUpdate = () => {
   const { t } = useTranslation(['common', 'users']);
 
   const { login } = useParams();
+  console.log(login);
   const navigate = useNavigate();
   const {
     user,
@@ -76,7 +77,7 @@ export const PageUserUpdate = () => {
   });
   const submitEditUser = (values: any) => {
     const userToSend = {
-      id: user?.id,
+      id: user?.user_id,
       ...values,
     };
     editUser(userToSend);
@@ -91,7 +92,7 @@ export const PageUserUpdate = () => {
               <SkeletonText maxW="6rem" noOfLines={2} />
             ) : (
               <Stack spacing="0">
-                <Heading size="sm">{user?.login}</Heading>
+                <Heading size="sm">{user?.username}</Heading>
                 <Text
                   fontSize="xs"
                   color="gray.600"

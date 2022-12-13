@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { FieldCheckboxes } from '@/components/FieldCheckboxes';
 import { FieldInput } from '@/components/FieldInput';
 import { FieldSelect } from '@/components/FieldSelect';
-import { AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE_KEY } from '@/constants/i18n';
 
 const AUTHORITIES = {
   ADMIN: 'ROLE_ADMIN',
@@ -21,7 +20,10 @@ const AUTHORITIES = {
 
 export const UserForm = () => {
   const { t } = useTranslation(['common', 'users']);
-
+  const roles = [
+    { label: 'Employee', value: 'ROLE_EMPLOYEE' },
+    { label: 'Chef', value: 'ROLE_CHEF' },
+  ];
   const authorities = Object.values(AUTHORITIES).map((value) => ({ value }));
   return (
     <Stack
@@ -34,7 +36,7 @@ export const UserForm = () => {
       p="6"
     >
       <FieldInput
-        name="login"
+        name="username"
         label={t('users:data.login.label')}
         required={t('users:data.login.required') as string}
         validations={[
@@ -54,10 +56,7 @@ export const UserForm = () => {
           },
         ]}
       />
-      <Stack direction={{ base: 'column', sm: 'row' }} spacing="6">
-        <FieldInput name="firstName" label={t('users:data.firstname.label')} />
-        <FieldInput name="lastName" label={t('users:data.lastname.label')} />
-      </Stack>
+
       <FieldInput
         name="email"
         label={t('users:data.email.label')}
@@ -77,17 +76,19 @@ export const UserForm = () => {
           },
         ]}
       />
+      <FieldInput
+        name="password"
+        label="Password"
+        required="Password is required"
+      />
       <FieldSelect
-        name="langKey"
-        label={t('users:data.language.label')}
-        options={AVAILABLE_LANGUAGES.map(({ key }) => ({
-          label: t(`common:languages.${key}`),
-          value: key,
-        }))}
-        defaultValue={DEFAULT_LANGUAGE_KEY}
+        name="speciality"
+        label="Speciality"
+        required="Speciality Should Be Selected!"
+        options={roles}
       />
       <FieldCheckboxes
-        name="authorities"
+        name="role"
         label={t('users:data.authorities.label')}
         options={authorities}
         required={t('users:data.authorities.required') as string}

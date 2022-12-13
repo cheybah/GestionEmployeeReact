@@ -1,8 +1,8 @@
-export type UserRole = 'ROLE_ADMIN' | 'ROLE_USER';
+export type UserRole = 'ROLE_CHEF' | 'ROLE_EMPLOYEE' | 'ROLE_ADMIN';
 
 export type User = {
   id: number;
-  login: string;
+  username: string;
   firstName?: string;
   lastName?: string;
   email: string;
@@ -13,6 +13,7 @@ export type User = {
   createdDate?: string;
   lastModifiedBy?: string;
   lastModifiedDate?: string;
+  roles?: TODO;
 };
 
 export type UserList = {

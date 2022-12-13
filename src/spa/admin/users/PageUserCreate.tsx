@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useToastError, useToastSuccess } from '@/components/Toast';
+import { useCreateAccount } from '@/spa/account/account.service';
 import { UserForm } from '@/spa/admin/users/UserForm';
-import { useUserCreate } from '@/spa/admin/users/users.service';
 import { Page, PageBottomBar, PageContent, PageTopBar } from '@/spa/layout';
 
 export const PageUserCreate = () => {
@@ -17,42 +17,43 @@ export const PageUserCreate = () => {
 
   const toastError = useToastError();
   const toastSuccess = useToastSuccess();
-
-  const { mutate: createUser, isLoading: createUserLoading } = useUserCreate({
-    onError: (error) => {
-      if (error.response) {
-        const { title, errorKey } = error.response.data;
-        toastError({
-          title: t('users:create.feedbacks.updateError.title'),
-          description: title,
-        });
-        switch (errorKey) {
-          case 'userexists':
-            form.invalidateFields({
-              login: t('users:data.login.alreadyUsed'),
-            });
-            break;
-          case 'emailexists':
-            form.invalidateFields({
-              email: t('users:data.email.alreadyUsed'),
-            });
-            break;
+  const { mutate: createUser, isLoading: createUserLoading } = useCreateAccount(
+    {
+      onError: (error) => {
+        if (error.response) {
+          const { title, errorKey } = error.response.data;
+          toastError({
+            title: t('users:create.feedbacks.updateError.title'),
+            description: title,
+          });
+          switch (errorKey) {
+            case 'userexists':
+              form.invalidateFields({
+                login: t('users:data.login.alreadyUsed'),
+              });
+              break;
+            case 'emailexists':
+              form.invalidateFields({
+                email: t('users:data.email.alreadyUsed'),
+              });
+              break;
+          }
         }
-      }
-    },
-    onSuccess: () => {
-      toastSuccess({
-        title: t('users:create.feedbacks.updateSuccess.title'),
-      });
-      navigate('/admin/users');
-    },
-  });
+      },
+      onSuccess: () => {
+        toastSuccess({
+          title: t('users:create.feedbacks.updateSuccess.title'),
+        });
+        navigate('/admin/users');
+      },
+    }
+  );
 
   const submitCreateUser = async (values: any) => {
     const newUser = {
       ...values,
     };
-    await createUser(newUser);
+    createUser(newUser);
   };
 
   return (

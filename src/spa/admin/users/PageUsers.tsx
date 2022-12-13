@@ -1,15 +1,10 @@
 import React from 'react';
 
 import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Avatar,
   Badge,
   Box,
   Button,
-  Center,
   Code,
   HStack,
   Heading,
@@ -28,14 +23,7 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import {
-  FiCheckCircle,
-  FiEdit,
-  FiPlus,
-  FiRefreshCw,
-  FiTrash2,
-  FiXCircle,
-} from 'react-icons/fi';
+import { FiEdit, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 import { ActionsButton } from '@/components/ActionsButton';
@@ -43,34 +31,21 @@ import { ConfirmMenuItem } from '@/components/ConfirmMenuItem';
 import {
   DataList,
   DataListCell,
-  DataListFooter,
   DataListHeader,
   DataListRow,
 } from '@/components/DataList';
-import { DateAgo } from '@/components/DateAgo';
 import { Icon } from '@/components/Icons';
-import {
-  Pagination,
-  PaginationButtonFirstPage,
-  PaginationButtonLastPage,
-  PaginationButtonNextPage,
-  PaginationButtonPrevPage,
-  PaginationInfo,
-} from '@/components/Pagination';
 import { useToastError, useToastSuccess } from '@/components/Toast';
-import { AdminNav } from '@/spa/admin/AdminNav';
 import { UserStatus } from '@/spa/admin/users/UserStatus';
 import {
   useUserList,
   useUserRemove,
   useUserUpdate,
 } from '@/spa/admin/users/users.service';
-import { User } from '@/spa/admin/users/users.types';
 import { Page, PageContent } from '@/spa/layout';
-import { usePaginationFromUrl } from '@/spa/router';
 
 type UserActionProps = Omit<MenuProps, 'children'> & {
-  user: User;
+  user: TODO;
 };
 
 const UserActions = ({ user, ...rest }: UserActionProps) => {
@@ -78,60 +53,58 @@ const UserActions = ({ user, ...rest }: UserActionProps) => {
   const toastSuccess = useToastSuccess();
   const toastError = useToastError();
   const { mutate: userUpdate, ...userUpdateData } = useUserUpdate({
-    onSuccess: ({ activated, login }) => {
+    onSuccess: ({ activated, username }) => {
       if (activated) {
         toastSuccess({
           title: t('users:feedbacks.activateUserSuccess.title'),
           description: t('users:feedbacks.activateUserSuccess.description', {
-            login,
+            username,
           }),
         });
       } else {
         toastSuccess({
           title: t('users:feedbacks.deactivateUserSuccess.title'),
           description: t('users:feedbacks.deactivateUserSuccess.description', {
-            login,
+            username,
           }),
         });
       }
     },
-    onError: (_, { activated, login }) => {
+    onError: (_, { activated, username }) => {
       if (activated) {
         toastError({
           title: t('users:feedbacks.activateUserError.title'),
           description: t('users:feedbacks.activateUserError.description', {
-            login,
+            username,
           }),
         });
       } else {
         toastError({
           title: t('users:feedbacks.deactivateUserError.title'),
           description: t('users:feedbacks.deactivateUserError.description', {
-            login,
+            username,
           }),
         });
       }
     },
   });
 
-  const activateUser = () => userUpdate({ ...user, activated: true });
-  const deactivateUser = () => userUpdate({ ...user, activated: false });
   const isActionsLoading = userUpdateData.isLoading;
 
   const { mutate: userRemove, ...userRemoveData } = useUserRemove({
-    onSuccess: (_, { login }) => {
+    onSuccess: (_, { username }) => {
       toastSuccess({
         title: t('users:feedbacks.deleteUserSuccess.title'),
         description: t('users:feedbacks.deleteUserSuccess.description', {
-          login,
+          username,
         }),
       });
     },
-    onError: (_, { login }) => {
+    onError: (_, { username }) => {
       toastError({
         title: t('users:feedbacks.deleteUserError.title'),
         description: t('users:feedbacks.deleteUserError.description', {
-          login,
+          username,
         }),
       });
     },
@@ -149,28 +122,11 @@ const UserActions = ({ user, ...rest }: UserActionProps) => {
         <MenuList>
           <MenuItem
             as={Link}
-            to={user.login}
+            to={user.username}
             icon={<Icon icon={FiEdit} fontSize="lg" color="gray.400" />}
           >
             {t('common:actions.edit')}
           </MenuItem>
-          {user.activated ? (
-            <MenuItem
-              onClick={deactivateUser}
-              icon={<Icon icon={FiXCircle} fontSize="lg" color="gray.400" />}
-            >
-              {t('common:actions.deactivate')}
-            </MenuItem>
-          ) : (
-            <MenuItem
-              onClick={activateUser}
-              icon={
-                <Icon icon={FiCheckCircle} fontSize="lg" color="gray.400" />
-              }
-            >
-              {t('common:actions.activate')}
-            </MenuItem>
-          )}
           <MenuDivider />
           <ConfirmMenuItem
             icon={<Icon icon={FiTrash2} fontSize="lg" color="gray.400" />}
@@ -186,15 +142,10 @@ const UserActions = ({ user, ...rest }: UserActionProps) => {
 
 export const PageUsers = () => {
   const { t } = useTranslation(['users']);
-  const { page, setPage } = usePaginationFromUrl();
-  const pageSize = 20;
-  const { users, totalItems, isLoadingPage, isError, refetch } = useUserList({
-    page: page - 1,
-    size: pageSize,
-  });
+  const { users } = useUserList();
 
   return (
-    <Page containerSize="xl" nav={<AdminNav />}>
+    <Page containerSize="xl">
       <PageContent>
         <HStack mb="4">
           <Box flex="1">
@@ -241,18 +192,6 @@ export const PageUsers = () => {
               {t('users:data.authorities.label')}
             </DataListCell>
             <DataListCell
-              colName="created"
-              isVisible={{ base: false, lg: true }}
-            >
-              {t('users:data.createdBy.label')}
-            </DataListCell>
-            <DataListCell
-              colName="lastModified"
-              isVisible={{ base: false, md: true }}
-            >
-              {t('users:data.modifiedBy.label')}
-            </DataListCell>
-            <DataListCell
               colName="status"
               colWidth={{ base: '2rem', md: '0.5' }}
               align="center"
@@ -263,131 +202,53 @@ export const PageUsers = () => {
             </DataListCell>
             <DataListCell colName="actions" colWidth="4rem" align="flex-end" />
           </DataListHeader>
-          {isError && (
-            <Center p={4}>
-              <Alert status="error">
-                <AlertIcon />
-                <AlertTitle>
-                  {t('users:feedbacks.loadingUserError.title')}
-                </AlertTitle>
-                <AlertDescription>
-                  {t('users:feedbacks.loadingUserError.description')}
-                  <Button
-                    colorScheme="error"
-                    variant="ghost"
-                    size="sm"
-                    leftIcon={<FiRefreshCw />}
-                    isLoading={isLoadingPage}
-                    onClick={() => refetch()}
-                  >
-                    {t('users:list.actions.refetch')}
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            </Center>
-          )}
-          {users?.map((user) => (
-            <DataListRow as={LinkBox} key={user.id}>
-              <DataListCell colName="login">
-                <HStack maxW="100%">
-                  <Avatar size="sm" name={user.login} mx="1" />
-                  <Box minW="0">
-                    <Text noOfLines={1} maxW="full" fontWeight="bold">
-                      <LinkOverlay as={Link} to={user.login}>
-                        {user.login}
-                      </LinkOverlay>
-                    </Text>
-                    <Text
-                      noOfLines={1}
-                      maxW="full"
-                      fontSize="sm"
-                      color="gray.600"
-                      _dark={{ color: 'gray.300' }}
-                    >
-                      {user.email}
-                    </Text>
-                  </Box>
-                </HStack>
-              </DataListCell>
-              <DataListCell colName="id">
-                <Code maxW="full" fontSize="xs">
-                  {user.id}
-                </Code>
-              </DataListCell>
-              <DataListCell colName="authorities">
-                <Wrap>
-                  {user.authorities?.map((authority) => (
-                    <WrapItem key={authority}>
-                      <Badge size="sm">{authority}</Badge>
-                    </WrapItem>
-                  ))}
-                </Wrap>
-              </DataListCell>
-              <DataListCell
-                colName="created"
-                fontSize="sm"
-                position="relative"
-                pointerEvents="none"
-              >
-                <Text noOfLines={1} maxW="full">
-                  {user.createdBy}
-                </Text>
-                {!!user.createdDate && (
-                  <Text
-                    noOfLines={1}
-                    maxW="full"
-                    pointerEvents="auto"
-                    color="gray.600"
-                    _dark={{ color: 'gray.300' }}
-                  >
-                    <DateAgo date={user.createdDate} />
-                  </Text>
-                )}
-              </DataListCell>
-              <DataListCell
-                colName="lastModified"
-                fontSize="sm"
-                position="relative"
-                pointerEvents="none"
-              >
-                <Text noOfLines={1} maxW="full">
-                  {user.lastModifiedBy}
-                </Text>
-                {!!user.lastModifiedDate && (
-                  <Text
-                    noOfLines={1}
-                    maxW="full"
-                    pointerEvents="auto"
-                    color="gray.600"
-                    _dark={{ color: 'gray.300' }}
-                  >
-                    <DateAgo position="relative" date={user.lastModifiedDate} />
-                  </Text>
-                )}
-              </DataListCell>
-              <DataListCell colName="status">
-                <UserStatus isActivated={user.activated} />
-              </DataListCell>
-              <DataListCell colName="actions">
-                <UserActions user={user} />
-              </DataListCell>
-            </DataListRow>
-          ))}
-          <DataListFooter>
-            <Pagination
-              isLoadingPage={isLoadingPage}
-              setPage={setPage}
-              page={page}
-              pageSize={pageSize}
-              totalItems={totalItems}
-            >
-              <PaginationButtonFirstPage />
-              <PaginationButtonPrevPage />
-              <PaginationInfo flex="1" />
-              <PaginationButtonNextPage />
-              <PaginationButtonLastPage />
-            </Pagination>
-          </DataListFooter>
+          {!!users &&
+            users?.map((user: TODO) => (
+              <DataListRow as={LinkBox} key={'key' + user.user_id}>
+                <DataListCell colName="login">
+                  <HStack maxW="100%">
+                    <Avatar size="sm" name={user.username} mx="1" />
+                    <Box minW="0">
+                      <Text noOfLines={1} maxW="full" fontWeight="bold">
+                        <LinkOverlay as={Link} to={`${user.user_id}`}>
+                          {user.username}
+                        </LinkOverlay>
+                      </Text>
+                      <Text
+                        noOfLines={1}
+                        maxW="full"
+                        fontSize="sm"
+                        color="gray.600"
+                        _dark={{ color: 'gray.300' }}
+                      >
+                        {user.email}
+                      </Text>
+                    </Box>
+                  </HStack>
+                </DataListCell>
+                <DataListCell colName="id">
+                  <Code maxW="full" fontSize="xs">
+                    {user.user_id}
+                  </Code>
+                </DataListCell>
+                <DataListCell colName="authorities">
+                  <Wrap>
+                    {user.authorities?.map((authority: TODO) => (
+                      <WrapItem key={authority}>
+                        <Badge size="sm">{authority}</Badge>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </DataListCell>
+
+                <DataListCell colName="status">
+                  <UserStatus isActivated={!!user.enabled} />
+                </DataListCell>
+                <DataListCell colName="actions">
+                  <UserActions user={user} />
+                </DataListCell>
+              </DataListRow>
+            ))}
         </DataList>
       </PageContent>
     </Page>

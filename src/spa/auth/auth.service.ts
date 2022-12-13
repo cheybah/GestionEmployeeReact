@@ -5,19 +5,19 @@ import { useAuthContext } from '@/spa/auth/AuthContext';
 
 export const useLogin = (
   config: UseMutationOptions<
-    { id_token: string },
+    { user_id: string },
     AxiosError<any>,
     { username: string; password: string }
   > = {}
 ) => {
   const { updateToken } = useAuthContext();
   return useMutation(
-    ({ username, password }) =>
-      Axios.post('/authenticate', { username, password }),
+    ({ username, password }) => Axios.post('/login', { username, password }),
     {
       ...config,
       onSuccess: (data, ...rest) => {
-        updateToken(data.id_token);
+        console.log(data);
+        updateToken(data.user_id);
         if (config.onSuccess) {
           config.onSuccess(data, ...rest);
         }

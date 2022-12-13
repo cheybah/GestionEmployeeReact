@@ -7,7 +7,6 @@ import {
 } from '@tanstack/react-query';
 import Axios, { AxiosError } from 'axios';
 
-import { DEFAULT_LANGUAGE_KEY } from '@/constants/i18n';
 import { User, UserList } from '@/spa/admin/users/users.types';
 
 type UserMutateError = {
@@ -26,46 +25,35 @@ const usersKeys = {
 export const useUserList = (
   { page = 0, size = 10 } = {},
   config: UseQueryOptions<
-    UserList,
+    TODO,
     AxiosError,
-    UserList,
+    TODO,
     InferQueryKey<typeof usersKeys.users>
   > = {}
 ) => {
   const result = useQuery(
     usersKeys.users({ page, size }),
-    (): Promise<UserList> =>
-      Axios.get('/admin/users', { params: { page, size, sort: 'id,desc' } }),
-    { keepPreviousData: true, ...config }
+    (): Promise<UserList> => Axios.get('/users'),
+    config
   );
 
-  const { content: users, totalItems } = result.data || {};
-  const totalPages = Math.ceil((totalItems ?? 0) / size);
-  const hasMore = page + 1 < totalPages;
-  const isLoadingPage = result.isFetching;
-
   return {
-    users,
-    totalItems,
-    hasMore,
-    totalPages,
-    isLoadingPage,
-    ...result,
+    users: result.data ?? [],
   };
 };
 
 export const useUser = (
   userLogin?: string,
   config: UseQueryOptions<
-    User,
+    TODO,
     AxiosError,
-    User,
+    TODO,
     InferQueryKey<typeof usersKeys.user>
   > = {}
 ) => {
   const result = useQuery(
     usersKeys.user({ login: userLogin }),
-    (): Promise<User> => Axios.get(`/admin/users/${userLogin}`),
+    (): Promise<User> => Axios.get(`/account/${userLogin}`),
     {
       enabled: !!userLogin,
       ...config,
@@ -84,7 +72,7 @@ export const useUserUpdate = (
   const queryClient = useQueryClient();
   return useMutation((payload) => Axios.put('/admin/users', payload), {
     ...config,
-    onSuccess: (data, payload, ...rest) => {
+    onSuccess: (data, payload: TODO, ...rest) => {
       queryClient.cancelQueries([...usersKeys.all(), 'users']);
       queryClient
         .getQueryCache()
@@ -104,7 +92,7 @@ export const useUserUpdate = (
           );
         });
       queryClient.invalidateQueries([...usersKeys.all(), 'users']);
-      queryClient.invalidateQueries(usersKeys.user({ login: payload.login }));
+      queryClient.invalidateQueries(usersKeys.user({ login: payload.user_id }));
       if (config.onSuccess) {
         config.onSuccess(data, payload, ...rest);
       }
@@ -113,21 +101,17 @@ export const useUserUpdate = (
 };
 
 export const useUserCreate = (
-  config: UseMutationOptions<
-    User,
-    AxiosError<UserMutateError>,
-    Pick<
-      User,
-      'login' | 'email' | 'firstName' | 'lastName' | 'langKey' | 'authorities'
-    >
-  > = {}
+  config: UseMutationOptions<TODO, AxiosError<UserMutateError>, TODO> = {}
 ) => {
   const queryClient = useQueryClient();
   return useMutation(
-    ({ langKey = DEFAULT_LANGUAGE_KEY, ...payload }) =>
-      Axios.post('/admin/users', {
-        langKey,
-        ...payload,
+    ({ username, email, password, role, speciality }) =>
+      Axios.post('/users', {
+        username,
+        email,
+        password,
+        role,
+        speciality,
       }),
     {
       ...config,
@@ -139,15 +123,14 @@ export const useUserCreate = (
   );
 };
 
-type UserWithLoginOnly = Pick<User, 'login'>;
+type UserWithLoginOnly = Pick<User, 'username'>;
 
 export const useUserRemove = (
   config: UseMutationOptions<void, unknown, UserWithLoginOnly> = {}
 ) => {
   const queryClient = useQueryClient();
   return useMutation(
-    (user: UserWithLoginOnly): Promise<void> =>
-      Axios.delete(`/admin/users/${user.login}`),
+    (user: TODO): Promise<void> => Axios.delete(`/users/${user.user_id}`),
     {
       ...config,
       onSuccess: (...args) => {

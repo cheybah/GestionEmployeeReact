@@ -25,7 +25,8 @@ export const useAccount = (
   const { i18n } = useTranslation();
   const { data: account, ...rest } = useQuery(
     accountKeys.account(),
-    (): Promise<Account> => Axios.get('/account'),
+    (): Promise<Account> =>
+      Axios.get('/account/' + localStorage.getItem('authToken')),
     {
       onSuccess: (data) => {
         i18n.changeLanguage(data?.langKey);
@@ -37,8 +38,15 @@ export const useAccount = (
       ...config,
     }
   );
-  const isAdmin = !!account?.authorities?.includes('ROLE_ADMIN');
-  return { account, isAdmin, ...rest };
+  const user = {
+    ...account,
+    authorities: account?.roles?.map((authority: TODO) => authority?.role),
+  };
+
+  const isAdmin = !!user?.authorities?.includes('admin');
+  const isChef = !!user?.authorities?.includes('ROLE_CHEF');
+  const isEmployee = !!user?.authorities?.includes('ROLE_EMPLOYEE');
+  return { account: user, isAdmin, isChef, isEmployee, ...rest };
 };
 
 type AccountError = {
@@ -50,12 +58,21 @@ export const useCreateAccount = (
   config: UseMutationOptions<
     Account,
     AxiosError<AccountError>,
-    Pick<Account, 'login' | 'email'> & { password: string; speciality: string }
+    Pick<Account, 'username' | 'email'> & {
+      password: string;
+      speciality: string;
+      username: string;
+    }
   > = {}
 ) => {
   return useMutation(
-    ({ login, email, password, speciality }): Promise<Account> =>
-      Axios.post('/api/auth/signup', { login, email, password, speciality }),
+    ({ username, email, password, speciality }): Promise<Account> =>
+      Axios.post('/register', {
+        username,
+        email,
+        password,
+        role: [speciality],
+      }),
     {
       ...config,
     }
